@@ -1,0 +1,30 @@
+body{
+    font-family: "Lato",sans-serif;
+}
+.sidenav{
+    height: 100%;
+    width: 160px;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 16px;
+}
+.sidenav .item{
+    padding: 6px 8px 10px 16px;
+    text-decoration: none;
+    font-size: 20px;
+    color: #818181;
+    display: block;
+}
+
+.sidenav .item.active{
+    
+    color:cyan;
+}
+.content{
+    width: 900px;
+    margin: auto;
+    
+}

@@ -1,0 +1,9 @@
+.addBtn{
+    position: relative;
+    left: 10px;
+}
+img{
+    display: block;
+    height: 200px;
+    width: 400px;
+}

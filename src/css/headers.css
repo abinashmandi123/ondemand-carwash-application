@@ -1,0 +1,43 @@
+.header-blue {
+    /* background: linear-gradient(135deg, #29e5fe, #b3ddff); */
+    /* background-color: #184e8e; */
+    padding-bottom: 40px;
+    font-family: 'Source Sans Pro', sans-serif;
+
+}
+
+.login{
+    margin-right: 10px;
+    text-decoration-line: none;
+}
+
+.loginSignup{
+    position:absolute;
+    right: 10px;
+}
+
+.accountDiv{
+    display: flex;
+    flex-direction: column;
+}
+
+#accountLogo{
+    position: relative;
+    top: 10px;
+}
+
+ul li{
+    color:white;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+@media(max-width:767px){
+
+}
+@media(max-width:767px){
+    ul li{
+        display: block;
+        width: 100%;
+    }
+}
