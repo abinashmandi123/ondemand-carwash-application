@@ -1,14 +1,13 @@
-import React, { Component } from 'react'
-import SideNav2 from './SideNav2'
+import React from 'react';
+import SideNav2 from './SideNav2';
 
-export class CarMgmt extends Component {
-    render() {
-        return (
-            <>
-                <SideNav2></SideNav2>
-            </>
-        )
-    }
-}
+const CarMgmt = () => {
+  return (
+    <>
+      <SideNav2 />
+    </>
+  );
+};
 
-export default CarMgmt
+export default CarMgmt;
+

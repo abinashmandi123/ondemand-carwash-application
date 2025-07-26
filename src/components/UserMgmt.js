@@ -1,25 +1,28 @@
-import React, { Component } from 'react'
+import React from 'react';
+import { useHistory } from 'react-router-dom'; // React Router v5
 import SideNav from './SideNav';
-import ViewCustomer from './ViewCustomer';
-export class UserMgmt extends Component {
-    constructor(props){
-        super(props);
-        this.handleViewCustomers=this.handleViewCustomers.bind(this);
-        this.handleAddWasher=this.handleAddWasher.bind(this);
-    }
-    handleViewCustomers(){
-        this.props.history.push("/viewCustomer");
-    }
-    handleAddWasher(){
-        this.props.history.push("/addWasher");
-    }
-    render() {
-        return (
-            <>
-               <SideNav></SideNav>
-            </>
-        )
-    }
+
+const UserMgmt = () => {
+  const history = useHistory(); // Using the useHistory hook for navigation
+
+  // Handle navigation to different views
+  const handleViewCustomers = () => {
+    history.push("/viewCustomer"); // Navigate to View Customers page
+  };
+
+  const handleAddWasher = () => {
+    history.push("/addWasher"); // Navigate to Add Washer page
+  };
+
+  return (
+    <>
+      <SideNav />
+      <div>
+        <button onClick={handleViewCustomers}>View Customers</button>
+        <button onClick={handleAddWasher}>Add Washer</button>
+      </div>
+    </>
+  );
 }
 
-export default UserMgmt
+export default UserMgmt;

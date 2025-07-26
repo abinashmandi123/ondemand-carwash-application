@@ -1,126 +1,101 @@
-import React, { Component } from 'react'
-
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export class EditCar extends Component {
-    constructor(props){
-        super(props);
-        this.handleEditCar = this.handleEditCar.bind(this);
-        this.onChangeCarNumber = this.onChangeCarNumber.bind(this);
-        this.onChangeCarModel = this.onChangeCarModel.bind(this);
-        this.onChangeCarType = this.onChangeCarType.bind(this);
-        this.onChangeCarImage = this.onChangeCarImage.bind(this);
-        this.state={
-            carNumber:"",
-            owner:"",
-            carType:"",
-            carModel:"",
-            carImage:"",
-            car:[]
-        }
+const EditCar = () => {
+  const { id } = useParams(); // Get the car ID from the URL parameters
 
-    }
-    onChangeCarNumber = (event) => {
-        this.setState({
-          carNumber: event.target.value,
-        });
-      };
-      onChangeCarModel = (event) => {
-        this.setState({
-          carModel: event.target.value,
-        });
-      };
-      onChangeCarType = (event) => {
-        this.setState({
-          carType: event.target.value,
-        });
-      };
-      onChangeCarImage=(event)=>{
-        this.setState({
-          carImage:event.target.files[0]
-        })
-      }
-      handleEditCar() {
-        AuthService.editCar(
-          this.props.match.params.id,
-          this.state.carNumber,
-          this.state.owner,
-          this.state.carType,
-          this.state.carModel,
-          this.state.carImage
-        ).then((response) => {
-          alert("car updated succesfully");
-            this.props.history.push("/viewCar");
-            window.location.reload();
-            console.log(response);
-        })
-      }
+  const [carNumber, setCarNumber] = useState('');
+  const [owner, setOwner] = useState('');
+  const [carType, setCarType] = useState('');
+  const [carModel, setCarModel] = useState('');
+  const [carImage, setCarImage] = useState('');
 
-      componentDidMount(){
-        AuthService.getCarById(this.props.match.params.id).then((response)=>{
-            console.log(response.data)
-            this.setState({
-                car:response.data
-            })
-        }
-            
-        );
-        };
-    render() {
-        const car=this.state.car;
-        return (
-            <>
-                <div className="container rounded bg-white mt-5">
-          <div className="row">
-          <h2 class="text-right">Edit Car</h2>
-            <div className="col-md-12">
-              <div class="row mt-5 mb-5">
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Enter Car Number"
-                    onChange={this.onChangeCarNumber}
-                  />
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Enter Car Model"
-                    onChange={this.onChangeCarModel}
-                  />
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-                <div class="col-md-4">
-                 <select onChange={this.onChangeCarType}>
-                 <option value="">Choose Car Type</option>
-                   <option value="SUV">SUV</option>
-                   <option value="Sedan">Sedan</option>
-                   <option value="Sports">Sports</option>
-                 </select>
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-                <div class="col-md-4">
-                  <input
-                    type="file"
-                    class="form-control"
-                    placeholder=""
-                    onChange={this.onChangeCarImage}
-                  />
-                </div>
+  useEffect(() => {
+    AuthService.getCarById(id)
+      .then((response) => {
+        const { carNumber, owner, carModel, carType } = response.data;
+        setCarNumber(carNumber);
+        setOwner(owner);
+        setCarModel(carModel);
+        setCarType(carType);
+      })
+      .catch((err) => {
+        toast.error('Error fetching car details.');
+      });
+  }, [id]);
+
+  const handleEditCar = () => {
+    AuthService.editCar(id, carNumber, owner, carType, carModel, carImage)
+      .then((response) => {
+        toast.success('Car updated successfully');
+        window.location.reload();
+      })
+      .catch(() => {
+        toast.error('Unable to update car');
+      });
+  };
+
+  return (
+    <>
+      <div className="container rounded bg-white mt-5">
+        <div className="row">
+          <h2 className="text-right">Edit Car</h2>
+          <div className="col-md-12">
+            <div className="row mt-5 mb-5">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter Car Number"
+                  value={carNumber}
+                  onChange={(e) => setCarNumber(e.target.value)}
+                />
               </div>
             </div>
-            <div class="mt-5 text-right"><button class="btn btn-primary profile-button" type="button" onClick={this.handleEditCar}>Save</button></div>
+            <div className="row mt-5 mb-5">
+              <div className="col-md-4">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter Car Model"
+                  value={carModel}
+                  onChange={(e) => setCarModel(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="row mt-5 mb-5">
+              <div className="col-md-4">
+                <select onChange={(e) => setCarType(e.target.value)} value={carType}>
+                  <option value="">Choose Car Type</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="Sports">Sports</option>
+                </select>
+              </div>
+            </div>
+            <div className="row mt-5 mb-5">
+              <div className="col-md-4">
+                <input
+                  type="file"
+                  className="form-control"
+                  onChange={(e) => setCarImage(e.target.files[0])}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 text-right">
+            <button className="btn btn-primary profile-button" type="button" onClick={handleEditCar}>
+              Save
+            </button>
           </div>
         </div>
-            </>
-        )
-    }
-}
+        <ToastContainer />
+      </div>
+    </>
+  );
+};
 
-export default EditCar
+export default EditCar;

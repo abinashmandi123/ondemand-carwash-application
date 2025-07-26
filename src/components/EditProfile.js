@@ -1,146 +1,169 @@
-import React, { Component } from "react";
-
+import React, { useState, useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import AuthService from "../services/AuthService";
 import "../css/editProfile.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export class EditProfile extends Component {
-  constructor(props) {
-    super(props);
+const EditProfile = () => {
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [contact, setContact] = useState("");
+  const [address, setAddress] = useState("");
+  const [profilePic, setProfilePic] = useState(null);
+  const [customer, setCustomer] = useState([]);
 
-    this.handleEditProfile = this.handleEditProfile.bind(this);
-    // this.onChangeName = this.onChangeName.bind(this);
-    // this.onChangeUsername = this.onChangeUsername.bind(this);
-    this.onChangeEmail = this.onChangeEmail.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
-    this.onChangeContact = this.onChangeContact.bind(this);
-    this.onChangeAddress = this.onChangeAddress.bind(this);
-    this.onChangeProfilePic=this.onChangeProfilePic.bind(this);
+  const history = useHistory();
 
-    this.state = {
-      name: "",
-      username: "",
-      email: "",
-      password: "",
-      contact: "",
-      address: "",
-      profilePic:null,
-      redirect: null,
-    };
-  }
-  componentDidMount(){
-    const user=JSON.parse(localStorage.getItem('user'));
-    this.setState({
-      name:user.name,
-      username:user.username,
-    })
-  }
-  // componentDidUpdate(){
-  //   this.setState({
-  //     profilePic:this.state.profilePic
-  //   })
-  // }
-  // onChangeName = (event) => {
-  //   this.setState({
-  //     name: event.target.value,
-  //   });
-  // };
-  // onChangeUsername = (event) => {
-  //   this.setState({
-  //     username: event.target.value,
-  //   });
-  // };
-  onChangeEmail = (event) => {
-    this.setState({
-      email: event.target.value,
-    });
-  };
-  onChangePassword = (event) => {
-    this.setState({
-      password: event.target.value,
-    });
-  };
-  onChangeContact = (event) => {
-    this.setState({
-      contact: event.target.value,
-    });
-  };
-  onChangeAddress = (event) => {
-    this.setState({
-      address: event.target.value,
-    });
-  };
-  onChangeProfilePic=(event)=>{
-    this.setState({
-      profilePic:event.target.files[0]
-    })
-  }
-  handleEditProfile() {
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      AuthService.getCustomerByUsername(user.username)
+        .then((res) => {
+          setCustomer(res.data);
+          setName(user.name);
+          setUsername(user.username);
+          setEmail(res.data.email);
+          setPassword(res.data.password);
+          setContact(res.data.contact);
+          setAddress(res.data.address);
+        })
+        .catch((err) => {
+          toast.error("Error fetching user details");
+        });
+    }
+  }, []);
+
+  const handleEditProfile = () => {
     AuthService.editProfile(
-      this.state.name,
-      this.state.username,
-      this.state.email,
-      this.state.password,
-      this.state.contact,
-      this.state.address,
-      this.state.profilePic
+      name,
+      username,
+      email,
+      password,
+      contact,
+      address,
+      profilePic
     )
       .then((response) => {
-        alert("profile updated succesfully");
-        this.props.history.push("/profile");
-        window.location.reload();
-        console.log(response);
+        toast.success("Profile updated successfully");
+        history.push("/profile");
       })
-      .catch((err)=>{
-        console.log(err);
+      .catch((err) => {
+        console.error(err);
+        toast.error("Unable to update profile");
       });
-  }
+  };
 
-  render() {
-    const profilePic=this.state.profilePic;
-    return (
-      <>
-       <div class="container rounded bg-white mt-5">
-    <div class="row">
-        <div class="col-md-4 border-right">
-            <div class="d-flex flex-column align-items-center text-center p-3 py-5"><img class="rounded-circle mt-5" src={`data:image/jpeg;base64,${profilePic}`} width="90"/><span class="font-weight-bold"></span><span class="text-black-50"></span><span></span></div>
-            <div><input  type="file"
-                    class="form-control"
-                    onChange={this.onChangeProfilePic}/></div>
-            
-        </div>
-        {/* "https://i.imgur.com/0eg0aG0.jpg" */}
-        <div class="col-md-8">
-            <div class="p-3 py-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex flex-row align-items-center back"><i class="fa fa-long-arrow-left mr-1 mb-1"></i>
-                        <h6>Back to home</h6>
-                    </div>
-                    <h6 class="text-right">Edit Profile</h6>
+  return (
+    <>
+      <div className="container rounded bg-white mt-5">
+        <div className="row">
+          <div className="col-md-12">
+            <div className="p-3 py-5">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex flex-row align-items-center back">
+                  <i className="fa fa-long-arrow-left mr-1 mb-1"></i>
+                  <h6>Back to home</h6>
                 </div>
-                <div class="row mt-2">
-                    <div class="col-md-6"><input type="text" class="form-control" placeholder="Full Name" defaultValue={this.state.name}  /></div>
-                    <div class="col-md-6"><input type="text" class="form-control"  placeholder="Username"  value={this.state.username}/></div>
+                <h6 className="text-right">Edit Profile</h6>
+              </div>
+              <div className="row mt-2">
+                <div className="col-md-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Full Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-6"><input type="text" class="form-control" placeholder="Email"  onChange={this.onChangeEmail}/></div>
-                    <div class="col-md-6"><input type="text" class="form-control"  placeholder="Phone number" onChange={this.onChangeContact}/></div>
+                <div className="col-md-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Username"
+                    value={username}
+                    disabled
+                  />
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-6"><input type="text" class="form-control" placeholder="address" onChange={this.onChangeAddress}/></div>
-                    <div class="col-md-6"><span></span></div>
+              </div>
+              <div className="row mt-3">
+                <div className="col-md-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
-                <div class="row mt-3">
-                    <div class="col-md-6"><input type="password" class="form-control" placeholder="Password" onChange={this.onChangePassword}/></div>
-                    <div class="col-md-6"><span></span></div>
+                <div className="col-md-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Phone number"
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                  />
                 </div>
-                
+              </div>
+              <div className="row mt-3">
+                <div className="col-md-6">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <span></span>
+                </div>
+              </div>
+              <div className="row mt-3">
+                <div className="col-md-6">
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="Password"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <span></span>
+                </div>
+              </div>
+              <div className="row mt-3">
+                <div className="col-md-6">
+                  <label>Choose Profile picture</label>
+                </div>
+                <div className="col-md-6">
+                  <input
+                    type="file"
+                    className="form-control"
+                    onChange={(e) => setProfilePic(e.target.files[0])}
+                  />
+                </div>
+              </div>
             </div>
-        </div><div class="mt-5 text-right"><button class="btn btn-primary profile-button" type="button" onClick={this.handleEditProfile}>Save Profile</button></div>
-    </div>
-</div>
-      </>
-    );
-  }
-}
+          </div>
+          <div className="mt-5 text-right">
+            <button
+              className="btn btn-primary profile-button"
+              type="button"
+              onClick={handleEditProfile}
+            >
+              Save Profile
+            </button>
+          </div>
+        </div>
+        <ToastContainer />
+      </div>
+    </>
+  );
+};
 
 export default EditProfile;

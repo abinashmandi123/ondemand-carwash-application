@@ -1,16 +1,14 @@
-import React, { Component } from 'react'
-import {Redirect} from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { Redirect } from 'react-router-dom';
 import Form from "react-validation/build/form";
 import Input from "react-validation/build/input";
 import CheckButton from "react-validation/build/button";
-import {NavLink} from 'react-router-dom'
-import '../css/login.css'
+import { NavLink } from 'react-router-dom';
+import '../css/login.css';
 import { isEmail } from "validator";
-
 import AuthService from '../services/AuthService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 
 const required = value => {
   if (!value) {
@@ -21,6 +19,7 @@ const required = value => {
     );
   }
 };
+
 const vname = value => {
   if (value.length < 3 || value.length > 20) {
     return (
@@ -30,6 +29,7 @@ const vname = value => {
     );
   }
 };
+
 const email = value => {
   if (!isEmail(value)) {
     return (
@@ -59,165 +59,129 @@ const vpassword = value => {
     );
   }
 };
-export class Register extends Component {
-  constructor(props){
-    super(props);
-    this.handleRegister = this.handleRegister.bind(this);
-    this.onChangeName = this.onChangeName.bind(this);
-    this.onChangeUsername = this.onChangeUsername.bind(this);
-    this.onChangeEmail = this.onChangeEmail.bind(this);
-    this.onChangePassword = this.onChangePassword.bind(this);
 
-    this.state={
-      name:'',
-      username:'',
-      email:'',
-      password:'',
-      successful:false,
-      message:'',
-      redirect:null
-    }
-  }
- 
-   onChangeName=event=>{
-    this.setState({
-      name:event.target.value,
-    
-    })
-  }
-  onChangeUsername=event=>{
-    this.setState({
-      username:event.target.value,
-    
-    })
-  }
-  onChangeEmail=event=>{
-    this.setState({
-      email:event.target.value,
-    
-    })
-  }
-  onChangePassword=event=>{
-    this.setState({
-      password:event.target.value
-    })
-  }
-  
-  handleRegister(e) {
+const Register = () => {
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [successful, setSuccessful] = useState(false);
+  const [redirect, setRedirect] = useState(null);
+
+  const formRef = useRef(null);
+  const checkBtnRef = useRef(null);
+
+  const handleRegister = (e) => {
     e.preventDefault();
+    setMessage("");
+    setSuccessful(false);
 
-    this.setState({
-      message: "",
-      successful: false
-    });
+    formRef.current.validateAll();
 
-    this.form.validateAll();
-
-    if (this.checkBtn.context._errors.length === 0) {
-      AuthService.register(
-        this.state.name,
-        this.state.username,
-        this.state.email,
-        this.state.password
-      ).then(
+    if (checkBtnRef.current.context._errors.length === 0) {
+      AuthService.register(name, username, email, password).then(
         response => {
-          this.setState({
-            message: response.data.message,
-            successful: true
-          });
-          toast.success("ypu are registered succesfully");
-          Input.value="";
+          setMessage(response.data.message);
+          setSuccessful(true);
+          toast.success("You are registered successfully!");
         },
         error => {
           const resMessage =
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
+            (error.response && error.response.data && error.response.data.message) ||
             error.message ||
             error.toString();
-
-          this.setState({
-            successful: false,
-            message: resMessage
-          });
-          
+          setSuccessful(false);
+          setMessage(resMessage);
         }
-        
-      );
+      ).catch(err => {
+        console.log(err);
+        if (err.status !== 200) {
+          setMessage(err.json().error);
+        }
+      });
     }
-  }
-  closeLogin(){
-    document.getElementById("register").style.display="none";
-    this.setState({
-      redirect:"/"
-    })
-  }
-  render() {
-    if(this.state.redirect){
-      return <Redirect to={this.state.redirect}/>
-    }
-    return (
-      <>
-         <div className="wrapper fadeInDown" id="register">
-            <div id="formContent">
-            <button type="button" className="close" aria-label="Close" onClick={()=>this.closeLogin()}>
-                <span aria-hidden="true">&times;</span>
-              </button>
-            <div className="icon">
-            </div>
+  };
 
-              <div className="fadeIn first">
-              
-              </div>
-              
-            <Form onSubmit={this.handleRegister} ref={c=>{
-              this.form=c;
-            }}>
-    
-              {/* {!this.state.successful && ( */}
-              <div>
-              <Input type="text" id="name" className="form-control fadeIn second" name="name" placeholder="name"  validations={[required, vname]} onChange={this.onChangeName} />
-              <Input type="text" id="username" className="form-control fadeIn second" name="username" placeholder="username" validations={[required, vusername]} onChange={this.onChangeUsername}/>
-              <Input type="text" id="email" className="form-control fadeIn third" name="email" placeholder="email" validations={[required, email]} onChange={this.onChangeEmail}/>
-              <Input type="password" id="password" className="form-control fadeIn third" name="password" placeholder="password" validations={[required, vpassword]} onChange={this.onChangePassword}/>
-              <Input type="submit" className="fadeIn fourth" value="Sign Up"/>
-            
-              </div>
-              {/* )}
-              {this.state.message && (
-              <div className="form-group">
-                <div
-                  className={
-                    this.state.successful
-                      ? "alert alert-success"
-                      : "alert alert-danger"
-                  }
-                  role="alert"
-                >
-                  {this.state.message}
-                </div>
-              </div> */}
-            {/* )} */}
+  const closeLogin = () => {
+    document.getElementById("register").style.display = "none";
+    setRedirect("/");
+  };
+
+  if (redirect) {
+    return <Redirect to={redirect} />;
+  }
+
+  return (
+    <>
+      <div className="wrapper fadeInDown" id="register">
+        <div id="formContent">
+          <button type="button" className="close" aria-label="Close" onClick={closeLogin}>
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <div className="icon"></div>
+
+          <div className="fadeIn first"></div>
+
+          <Form onSubmit={handleRegister} ref={formRef}>
+            <div>
+              <Input
+                type="text"
+                id="name"
+                className="form-control fadeIn second"
+                name="name"
+                placeholder="Name"
+                validations={[required, vname]}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Input
+                type="text"
+                id="username"
+                className="form-control fadeIn second"
+                name="username"
+                placeholder="Username"
+                validations={[required, vusername]}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <Input
+                type="text"
+                id="email"
+                className="form-control fadeIn third"
+                name="email"
+                placeholder="Email"
+                validations={[required, email]}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <Input
+                type="password"
+                id="password"
+                className="form-control fadeIn third"
+                name="password"
+                placeholder="Password"
+                validations={[required, vpassword]}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Input
+                type="submit"
+                className="fadeIn fourth"
+                value="Sign Up"
+              />
+            </div>
             <CheckButton
               style={{ display: "none" }}
-              ref={c => {
-                this.checkBtn = c;
-              }}
+              ref={checkBtnRef}
             />
-            </Form>
-              
+          </Form>
 
-            <div id="formFooter">
-              <NavLink className="underlineHover" to="">Forgot Password?</NavLink>
-            </div>
-
+          <div id="formFooter">
+            <NavLink className="underlineHover" to="">Forgot Password?</NavLink>
           </div>
-          <ToastContainer />
+
+        </div>
+        <ToastContainer />
       </div>
-      </>
-    )
-  }
-}
+    </>
+  );
+};
 
-export default Register
-
+export default Register;

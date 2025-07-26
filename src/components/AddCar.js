@@ -1,121 +1,108 @@
-import React, { Component } from "react";
-
+import React, { useState } from "react";
 import "../css/addCar.css";
 import AuthService from "../services/AuthService";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useHistory } from "react-router-dom";
 
-export class AddCar extends Component {
-  constructor(props) {
-    super(props);
-    this.handleAddCar = this.handleAddCar.bind(this);
-    this.onChangeCarNumber = this.onChangeCarNumber.bind(this);
-    this.onChangeCarModel = this.onChangeCarModel.bind(this);
-    this.onChangeCarType = this.onChangeCarType.bind(this);
-    this.onChangeCarImage = this.onChangeCarImage.bind(this);
-    this.state = {
-      carNumber: "",
-      owner:"",
-      carModel: "",
-      carType: "",
-      carImage:"",
-      redirect: null,
-    };
-  }
-  onChangeCarNumber = (event) => {
-    this.setState({
-      carNumber: event.target.value,
-    });
+const AddCar = () => {
+  const [carNumber, setCarNumber] = useState("");
+  const [owner, setOwner] = useState(AuthService.getCurrentUser()?.username || "");
+  const [carModel, setCarModel] = useState("");
+  const [carType, setCarType] = useState("");
+  const [carImage, setCarImage] = useState(null);
+
+  const history = useHistory();
+
+  const handleAddCar = () => {
+    if (!carNumber || !carModel || !carType || !carImage) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
+    AuthService.addCar(carNumber, owner, carType, carModel, carImage)
+      .then(() => {
+        toast.success("Car added successfully");
+        history.push("/addCar");
+      })
+      .catch((err) => {
+        toast.error("Failed to add car");
+        console.error(err);
+      });
   };
-  onChangeCarModel = (event) => {
-    this.setState({
-      carModel: event.target.value,
-    });
-  };
-  onChangeCarType = (event) => {
-    this.setState({
-      carType: event.target.value,
-    });
-  };
-  onChangeCarImage=(event)=>{
-    this.setState({
-      carImage:event.target.files[0]
-    })
-  }
-  handleAddCar() {
-    AuthService.addCar(
-      this.state.carNumber,
-      this.state.owner,
-      this.state.carType,
-      this.state.carModel,
-      this.state.carImage
-    ).then((response) => {
-      toast.success("car added succesfully");
-        this.props.history.push("/addCar");
-        window.location.reload();
-        console.log(response);
-    })
-  }
-  render() {
-    return (
-      <>
-        <div className="container rounded bg-white mt-5">
-          <div className="row">
-          <h2 class="text-right">Add Car</h2>
-            <div className="col-md-12">
-              <div class="row mt-5 mb-5">
-              <label className="lbl"> Car Number</label>
-                <div class="col-md-4">
-                  
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Enter Car Number"
-                    onChange={this.onChangeCarNumber}
-                  />
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-              <label className="lbl"> Car Model</label>
-                <div class="col-md-4">
-                  <input
-                    type="text"
-                    class="form-control"
-                    placeholder="Enter Car Model"
-                    onChange={this.onChangeCarModel}
-                  />
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-              <label className="lbl"> Car Type</label>
-                <div class="col-md-4">
-                 <select onChange={this.onChangeCarType}>
-                 <option value="">Choose Car Type</option>
-                   <option value="SUV">SUV</option>
-                   <option value="Sedan">Sedan</option>
-                   <option value="Sports">Sports</option>
-                 </select>
-                </div>
-              </div>
-              <div class="row mt-5 mb-5">
-              <label className="lbl"> Car Image</label>
-                <div class="col-md-4">
-                  <input
-                    type="file"
-                    class="form-control"
-                    placeholder=""
-                    onChange={this.onChangeCarImage}
-                  />
-                </div>
-              </div>
+
+  return (
+    <div className="container rounded bg-white mt-5">
+      <div className="row">
+        <h2 className="text-right">Add Car</h2>
+        <div className="col-md-12">
+          <div className="row mt-5 mb-5">
+            <label className="lbl">Car Number</label>
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter Car Number"
+                value={carNumber}
+                onChange={(e) => setCarNumber(e.target.value)}
+              />
             </div>
-            <div class="mt-5 text-right"><button class="btn btn-primary profile-button" type="button" onClick={this.handleAddCar}>Add Car</button></div>
           </div>
-          <ToastContainer />
+
+          <div className="row mt-5 mb-5">
+            <label className="lbl">Car Model</label>
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter Car Model"
+                value={carModel}
+                onChange={(e) => setCarModel(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="row mt-5 mb-5">
+            <label className="lbl">Car Type</label>
+            <div className="col-md-4">
+              <select
+                className="form-control"
+                value={carType}
+                onChange={(e) => setCarType(e.target.value)}
+              >
+                <option value="">Choose Car Type</option>
+                <option value="SUV">SUV</option>
+                <option value="Sedan">Sedan</option>
+                <option value="Sports">Sports</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="row mt-5 mb-5">
+            <label className="lbl">Car Image</label>
+            <div className="col-md-4">
+              <input
+                type="file"
+                className="form-control"
+                onChange={(e) => setCarImage(e.target.files[0])}
+              />
+            </div>
+          </div>
         </div>
-      </>
-    );
-  }
-}
+
+        <div className="mt-5 text-right">
+          <button
+            className="btn btn-primary profile-button"
+            type="button"
+            onClick={handleAddCar}
+          >
+            Add Car
+          </button>
+        </div>
+      </div>
+      <ToastContainer />
+    </div>
+  );
+};
 
 export default AddCar;

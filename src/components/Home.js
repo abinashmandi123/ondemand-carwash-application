@@ -1,18 +1,16 @@
-import React, { Component } from 'react'
+import React from 'react';
 
-import Body from './Body'
+import Body from './Body';
 // import Footer1 from './Footer1'
-import Footer2 from './Footer2'
+import Footer2 from './Footer2';
 
-export class Home extends Component {
-    render() {
-        return (
-            <div>
-                <Body></Body>
-                <Footer2></Footer2>
-            </div>
-        )
-    }
-}
+const Home = () => {
+  return (
+    <div>
+      <Body />
+      <Footer2 />
+    </div>
+  );
+};
 
-export default Home
+export default Home;
